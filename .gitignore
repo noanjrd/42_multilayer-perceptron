@@ -1,0 +1,5 @@
+venv
+.venv
+__pycache__
+prediction_dataset.csv
+training_dataset.csv
