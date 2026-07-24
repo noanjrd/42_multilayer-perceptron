@@ -52,6 +52,7 @@ def create_prediction_dataset(dataset):
 
 def create_training_dataset(dataset):
     normalize_data(dataset)
+    dataset = dataset.drop(['id'], axis=1)
     dataset.to_csv("training_dataset.csv")
     return
 
