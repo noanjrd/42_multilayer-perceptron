@@ -5,6 +5,7 @@ class Layer:
         self.number_neurons = number_neurons
         self.weights = np.zeros((number_neurons, number_weights))
         self.bias = np.zeros(number_neurons)
+        self.activations = None
         # print(self.weights, self.bias)
         # self.bias = 
         # print()
