@@ -3,6 +3,11 @@ import numpy as np
 import argparse
 from Layer import Layer
 
+class_to_index = {
+    'malignant' : 0,
+    'benign' : 0
+}
+
 def parse_args():
     parser = argparse.ArgumentParser(description="test")
     parser.add_argument(
@@ -49,11 +54,19 @@ def parse_args():
 def sigmoid(z):
     return 1 / (1 + (np.exp(-z)))
 
+def backpropagation():
+    return
+
+def softmax(x):
+    exp = np.exp(x)
+    return exp / np.sum(exp, axis=1, keepdims=True)
+
+def final_output(x):
+    res = softmax(x)
+    return res
+
+
 def rounds(args, train_data: pd.DataFrame, layer: Layer, x):
-    m = len(x)
-    # print(x)
-    lambda_reg = 0.01 # How do i decide the right value
-    y = (train_data['diagnosis'] == 'M').astype(int).to_numpy()
     res = np.empty((len(x),0))
     for neuron_index in range(layer.number_neurons):
         w = layer.weights[neuron_index]
@@ -82,12 +95,14 @@ def forward_propagation(args, layers, data):
         # print(new_data)
         # break
         # print(index)
-    print(new_data)
+    # print(new_data, new_data.shape)
+    res = softmax(new_data)
+    print(res, res.shape)
 
 def start_training(args):
     layers = [Layer(args.layers[i], args.layers[i-1]) for i in range(1,len(args.layers))]
-    layers = [Layer(args.layers[0], 31)] + layers
-    print(len(layers))
+    layers = [Layer(args.layers[0], 31)] + layers + [Layer(2, args.layers[-1])]
+    [print(layer) for layer in layers]
     data = pd.read_csv('training_dataset.csv')
     forward_propagation(args, layers, data)
     return
