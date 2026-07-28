@@ -54,15 +54,23 @@ def parse_args():
 def sigmoid(z):
     return 1 / (1 + (np.exp(-z)))
 
-def backpropagation():
-    return
-
 def softmax(x):
     exp = np.exp(x)
     return exp / np.sum(exp, axis=1, keepdims=True)
 
-def final_output(x):
+def final_output(args, train_data : pd.DataFrame, layers: list[Layer], x):
     res = softmax(x)
+    print(res)
+    for neuron_index, diagnos in enumerate(['M', 'B']):
+        y = (train_data['diagnosis'] == diagnos).astype(int).to_numpy()
+        print(y, y.shape)
+        errors = res[:,0] - y
+        derivative_of_weights = np.dot(errors, layers[-2].activations) / 588
+        derivative_of_bias = errors.mean()
+        layers[-1].weights[neuron_index] -= args.learning_rate * derivative_of_weights
+        layers[-1].bias[neuron_index] -= args.learning_rate * derivative_of_bias
+        layers[-1].errors_respect_weights[neuron_index] = derivative_of_weights
+        layers[-1].errors_respect_bias[neuron_index] = derivative_of_bias
     return res
 
 
@@ -96,8 +104,19 @@ def forward_propagation(args, layers, data):
         # break
         # print(index)
     # print(new_data, new_data.shape)
-    res = softmax(new_data)
-    print(res, res.shape)
+    final_output(args, training_dataset,layers ,new_data)
+
+def back_gradient_descent(args,current_layer_index, layers:list[Layer]):
+    for neuron_index in range(layers[current_layer_index].number_neurons):
+        errors = np.dot(layers[current_layer_index + 1].errors_respect_weights)
+
+    return
+
+def backpropagation(aregs, layers:list[Layer]):
+    for layer_index in range(len(layers)-2,0,-1):
+        back_gradient_descent(args, layer_index, layers)
+    return
+
 
 def start_training(args):
     layers = [Layer(args.layers[i], args.layers[i-1]) for i in range(1,len(args.layers))]
@@ -105,6 +124,7 @@ def start_training(args):
     [print(layer) for layer in layers]
     data = pd.read_csv('training_dataset.csv')
     forward_propagation(args, layers, data)
+    backpropagation(args, layers)
     return
 
 def main():
