@@ -46,7 +46,7 @@ def normalize_data(data: pd.DataFrame):
 def create_prediction_dataset(dataset):
     # print(dataset)
     normalize_data(dataset)
-    prediction_dataset = dataset.drop(['diagnosis'], axis=1)
+    prediction_dataset = dataset.drop(['id', 'diagnosis'], axis=1)
     prediction_dataset.to_csv("prediction_dataset.csv")
     return
 
