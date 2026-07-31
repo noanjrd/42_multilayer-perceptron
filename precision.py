@@ -17,11 +17,10 @@ def evaluate(y_pred):
 
 def output_layer(data):
     prob = softmax(data)
-    indexes = ['M', 'B']
     # print(soft)
-    print(prob)
+    # print(prob)
     prob = np.where((prob[:,0] < prob[:,1]), 'B', 'M')
-    print(prob)
+    # print(prob)
     evaluate(prob)
     return
 

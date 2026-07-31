@@ -43,21 +43,21 @@ def normalize_data(data: pd.DataFrame):
         max = data[col].max()
         data[col] = (data[col] - min) / (max - min)
 
-def create_prediction_dataset(dataset):
+def create_prediction_dataset(dataset: pd.DataFrame):
     # print(dataset)
     normalize_data(dataset)
     prediction_dataset = dataset.drop(['id', 'diagnosis'], axis=1)
-    prediction_dataset.to_csv("prediction_dataset.csv")
+    prediction_dataset.to_csv("prediction_dataset.csv", index=False)
     return
 
 def create_training_dataset(dataset):
     normalize_data(dataset)
     dataset = dataset.drop(['id'], axis=1)
-    dataset.to_csv("training_dataset.csv")
+    dataset.to_csv("training_dataset.csv", index=False)
     return
 
 def main():
-    dataset = pd.read_csv("data.csv")
+    dataset = pd.read_csv("data.csv", header=None)
     dataset.columns = columns
     # print(dataset)
     create_prediction_dataset(dataset.copy())
