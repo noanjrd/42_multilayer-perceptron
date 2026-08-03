@@ -3,3 +3,4 @@ venv
 __pycache__
 prediction_dataset.csv
 training_dataset.csv
+weights_bias.json

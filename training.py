@@ -1,93 +1,42 @@
 import pandas as pd
 import numpy as np
-import argparse
 from Layer import Layer
 import json
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="test")
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        nargs="?", # how many values '?' for 0 or 1, '+' for one or more
-        required=False,
-        default=20,
-        help="Number of training epochs"
-        )
-    
-    parser.add_argument(
-        "--layers",
-        type=int,
-        nargs="*",
-        required=False,
-        default=[5,4],
-        help="Number of hidden layers and their neurons"
-        )
-    
-    parser.add_argument(
-        "--batch_size",
-        type=int,
-        nargs="?",
-        required=False,
-        default=10,
-        help="Size of the batches"
-        )
-    
-    parser.add_argument(
-        "--learning_rate",
-        type=float,
-        nargs="?",
-        required=False,
-        default=0.01,
-        help="Learning rate value"
-        )
-    # print(parser)
-    return parser.parse_args()
-
-# def compute_loss():
-
-# def update_neuron():
-def sigmoid(z):
-    return 1 / (1 + (np.exp(-z)))
-
-def softmax(x):
-    exp = np.exp(x)
-    return exp / np.sum(exp, axis=1, keepdims=True)
+from arguments import parse_args
+from activations import sigmoid, softmax
 
 
-
-def back_gradient_descent(args, training_data:pd.DataFrame, current_layer_index:int, layers:list[Layer]):
+def backpropagation(args, training_data:pd.DataFrame, current_layer_index:int, layers:list[Layer]):
     current_layer = layers[current_layer_index]
     next_layer = layers[current_layer_index + 1]
     x = training_data.select_dtypes(include='number').to_numpy()
     weights_temp = np.empty((0, current_layer.weights.shape[1]))
     bias_temp = np.empty(0)
+
     for neuron_index in range(current_layer.number_neurons):
-        # for next_layer_neuron_index in range(layers[current_layer_index + 1].number_neurons):
-            # print(layers[current_layer_index + 1].weights[neuron_index].shape)
+    
         delta =  np.sum(next_layer.errors * next_layer.weights[:, neuron_index][:, None], axis=0)
-        # errors_bias =  np.sum(layers[current_layer_index + 1].errors_respect_bias * layers[current_layer_index + 1].bias[:, neuron_index][:, None], axis=0)
-        # print(errors, "h")
-        # print(layers[current_layer_index].activations[neuron_index], "act")
-        activation = current_layer.activations[neuron_index]
-        delta *= (activation * (1 - activation))
+        activations = current_layer.activations[neuron_index]
+        delta *= (activations * (1 - activations))
         current_layer.errors[neuron_index] = delta
+
         if current_layer_index != 0:
             gradient_weights = (layers[current_layer_index - 1].activations @ delta) / len(training_data)
         else:
             gradient_weights = x.T @ delta / len(training_data)
         gradient_bias = np.mean(delta)
+
         weights_temp = np.vstack((weights_temp, gradient_weights))
         bias_temp = np.append(bias_temp, gradient_bias)
-        # errors_weights = np.dot(layers[current_layer_index-1].activations[neuron_index], errors_weights) / 568
-        # print(errors_weights, errors_weights.shape)
+
     if current_layer_index > 0:
-        back_gradient_descent(args, training_data, current_layer_index - 1, layers)
+        backpropagation(args, training_data, current_layer_index - 1, layers)
 
     # print(args.learning_rate)
     current_layer.weights -= args.learning_rate * weights_temp
     current_layer.bias -= args.learning_rate * bias_temp
     return
+
 
 def final_output(args, train_data : pd.DataFrame, layers: list[Layer], x):
     tab = np.empty((len(train_data),0))
@@ -100,17 +49,17 @@ def final_output(args, train_data : pd.DataFrame, layers: list[Layer], x):
     bias_temp = np.empty(0)
     for neuron_index, diagnos in enumerate(['M', 'B']):
         y = (train_data['diagnosis'] == diagnos).astype(int).to_numpy()
-        # print(y, y.shape, layers[-2].activations)
+
         errors = res[:,neuron_index] - y  # derivative of BCE
+
         derivative_of_weights = errors @ layers[-2].activations.T  / len(train_data)
-        # print(derivative_of_weights)
-        # print(derivative_of_weights)
         derivative_of_bias = errors.mean()
-        # print(layers[-1].weights)
+        
         layers[-1].errors[neuron_index] = errors
         weights_temp = np.vstack((weights_temp, derivative_of_weights))
         bias_temp = np.append(bias_temp, derivative_of_bias)
-    back_gradient_descent(args, train_data, len(layers)-2, layers)
+
+    backpropagation(args, train_data, len(layers)-2, layers)
     layers[-1].weights -= args.learning_rate * weights_temp
     layers[-1].bias -= args.learning_rate * bias_temp
 
@@ -120,16 +69,13 @@ def rounds(layer: Layer, x):
     for neuron_index in range(layer.number_neurons):
         w = layer.weights[neuron_index]
         b = layer.bias[neuron_index]
-                # print(layer.weights[neuron_index])
         z = np.dot(x, w) + b
-                # print(z)
-        y_pred = sigmoid(z)
-                # print(y_pred)
-        # print(w)
-        # print(sigmoid_final)
-        layer.activations[neuron_index] = y_pred
-        res = np.column_stack((res, y_pred))
+
+        y_prediction = sigmoid(z)
+        layer.activations[neuron_index] = y_prediction
+        res = np.column_stack((res, y_prediction))
     return res
+
 
 def forward_propagation(args, training_data, layers):
     new_data = None
@@ -141,12 +87,9 @@ def forward_propagation(args, training_data, layers):
         else:
             x = new_data
         new_data = rounds(layer, x)
-        # print(layer.weights)
-        # print(new_data)
-        # break
-        # print(index)
-    # print(new_data, new_data.shape)
+
     final_output(args, training_data,layers ,new_data)
+
 
 def start_training(args):
     data = pd.read_csv('training_dataset.csv')
@@ -156,8 +99,7 @@ def start_training(args):
     [print(layer) for layer in layers]
     for _ in range(args.epochs):
         forward_propagation(args,data , layers )
-    # for i in range(len(layers)):
-    #     print(layers[i].weights)
+
     save_to_json(layers)
     return
 
@@ -171,13 +113,14 @@ def save_to_json(layers: list[Layer]):
         json.dump(data, f, indent=4)
     return 
 
+
 def main():
     args = parse_args()
     layers = args.layers
-    # parse_args()
     print(layers)
     start_training(args)
     return
+
 
 if __name__ == "__main__":
     main()

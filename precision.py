@@ -2,13 +2,8 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_score
+from activations import sigmoid, softmax
 
-def sigmoid(z):
-    return 1 / (1 + (np.exp(-z)))
-
-def softmax(x):
-    exp = np.exp(x)
-    return exp / np.sum(exp, axis=1, keepdims=True)
 
 def evaluate(y_pred):
     y_test = pd.read_csv("training_dataset.csv")[['diagnosis']]
