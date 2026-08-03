@@ -1,4 +1,6 @@
 import pandas as pd
+import math
+
 
 columns = [
     "id",
@@ -35,34 +37,44 @@ columns = [
     "fractal_dimension_worst",
 ]
 
-def normalize_data(data: pd.DataFrame):
+
+def normalize_dataset(data: pd.DataFrame):
     for col in data.columns:
-        if col in ['id', 'diagnosis' ]:
+        if col in ['diagnosis']:
             continue
         min = data[col].min()
         max = data[col].max()
         data[col] = (data[col] - min) / (max - min)
 
-def create_prediction_dataset(dataset: pd.DataFrame):
-    # print(dataset)
-    normalize_data(dataset)
-    prediction_dataset = dataset.drop(['id', 'diagnosis'], axis=1)
-    prediction_dataset.to_csv("prediction_dataset.csv", index=False)
+
+def create_validation_dataset(dataset: pd.DataFrame):
+    dataset.to_csv("validation_dataset.csv", index=False)
     return
 
+
 def create_training_dataset(dataset):
-    normalize_data(dataset)
-    dataset = dataset.drop(['id'], axis=1)
     dataset.to_csv("training_dataset.csv", index=False)
     return
+
+
+def split_dataset(dataset):
+    dataset = dataset.sample(n=len(dataset))
+    data_80 = math.floor(len(dataset) * 0.8)
+    x_train = dataset[0:data_80]
+    x_prediction = dataset[data_80:len(dataset)]
+    return x_train, x_prediction
+
 
 def main():
     dataset = pd.read_csv("data.csv", header=None)
     dataset.columns = columns
-    # print(dataset)
-    create_prediction_dataset(dataset.copy())
-    create_training_dataset(dataset.copy())
-    return
+    dataset = dataset.drop(['id'], axis=1)
+    x_train, x_validation = split_dataset(dataset)
+    normalize_dataset(x_train)
+    normalize_dataset(x_validation)
+
+    create_validation_dataset(x_validation)
+    create_training_dataset(x_train)
 
 
 if __name__ == "__main__":
