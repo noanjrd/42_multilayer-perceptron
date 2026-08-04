@@ -1,7 +1,12 @@
 from TrainingData import TrainingData
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import numpy as np
+
+def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+    compute_stats_loss(training_data, softmax_prob_train, softmax_prob_valid)
+    compute_stats_accuracy(training_data, softmax_prob_train, softmax_prob_valid)
+    return
+
 
 def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
     prediction_train = np.where(softmax_prob_train[:,0] > softmax_prob_train[:,1], 'M', 'B')
@@ -14,6 +19,7 @@ def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, sof
     # score_train = score_train.merge(score_valid)
     training_data.epoch_accuracy.append((score_train, score_valid))
     return
+
 
 def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
     training_dataset = training_data.training_dataset
@@ -31,6 +37,7 @@ def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax
     epoch_loss.append((loss_train, loss_valid))
     return
 
+
 def display_accuracy(training_data: TrainingData):
     print(training_data.epoch_accuracy[-1][1])
     # stats = np.array(training_data.epoch_accuracy)
@@ -41,7 +48,7 @@ def display_accuracy(training_data: TrainingData):
     # plt.title("Accuracy")
     # plt.legend()
     # plt.show()
-    return
+
 
 def display_loss(training_data: TrainingData):
     for epoch, (loss_train, loss_valid) in enumerate(training_data.epoch_loss):
