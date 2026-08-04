@@ -142,10 +142,16 @@ def start_training(args):
 
     for _ in range(args.epochs):
         for index in range(0,training_data.training_dataset.shape[0],args.batch_size):  
+            print("e")
             end = min(training_data.training_dataset.shape[0], index+args.batch_size)
-            layers = training_data.layers.copy()
-            for layer in layers:
-                
+            layers_copy = training_data.layers.copy()
+            training_data_copy = training_data.training_dataset.copy()
+            validation_data_copy = training_data.validation_dataset.copy()
+            for layer in training_data.layers:
+                layer.errors = layer.errors[index:end]
+                layer.activations = layer.activations[index:end]
+            training_data.training_dataset = training_data.training_dataset[index:end]
+            training_data.validation_dataset = training_data.validation_dataset[index:end]
             pass_forward(training_data)
 
     display_stats(training_data)
