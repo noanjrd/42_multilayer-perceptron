@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 import sys
-from activations import sigmoid, softmax
+from utils import sigmoid, softmax
 
 
 def output_layer(data):

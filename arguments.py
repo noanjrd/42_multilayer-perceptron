@@ -25,7 +25,7 @@ def parse_args():
         type=int,
         nargs="*",
         required=False,
-        default=[8,5],
+        default=[2,1],
         help="Number of hidden layers and their neurons"
         )
     

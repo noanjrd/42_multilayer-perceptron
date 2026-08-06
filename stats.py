@@ -5,6 +5,7 @@ import numpy as np
 def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
     compute_stats_loss(training_data, softmax_prob_train, softmax_prob_valid)
     compute_stats_accuracy(training_data, softmax_prob_train, softmax_prob_valid)
+    print(f"epoch {len(training_data.epoch_loss)}/{training_data.args.epochs} - loss: {training_data.epoch_loss[-1][0]:.4f} - val_loss : {training_data.epoch_loss[-1][1]:.4f}")
     return
 
 
@@ -40,20 +41,17 @@ def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax
 
 def display_accuracy(training_data: TrainingData):
     print(training_data.epoch_accuracy[-1][1])
-    # stats = np.array(training_data.epoch_accuracy)
-    # plt.plot(stats[:,0], label="Training loss")
-    # plt.plot(stats[:,1], label="Validation loss")
-    # plt.xlabel("Epoch")
-    # plt.ylabel("Accuracy")
-    # plt.title("Accuracy")
-    # plt.legend()
-    # plt.show()
+    stats = np.array(training_data.epoch_accuracy)
+    plt.plot(stats[:,0], label="Training loss")
+    plt.plot(stats[:,1], label="Validation loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy")
+    plt.legend()
+    plt.show()
 
 
 def display_loss(training_data: TrainingData):
-    for epoch, (loss_train, loss_valid) in enumerate(training_data.epoch_loss):
-        print(f"epoch {epoch}/{training_data.args.epochs} - loss: {loss_train:.4f} - val_loss : {loss_valid:.4f}")
-
     stats = np.array(training_data.epoch_loss)
     plt.plot(stats[:,0], label="Training accuracy")
     plt.plot(stats[:,1], label="Validation acuracy")
@@ -65,5 +63,5 @@ def display_loss(training_data: TrainingData):
     return
 
 def display_stats(training_data: TrainingData):
-    # display_loss(args, training_data)
+    display_loss(training_data)
     display_accuracy(training_data)
