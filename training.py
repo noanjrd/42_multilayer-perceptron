@@ -131,10 +131,12 @@ def start_training(args):
     training_data = TrainingData(x_train, x_valid,args, layers)
 
     training_dataset_copy = training_data.training_dataset.copy()
-    validation_dataset_copy = training_data.training_dataset.copy()
+    validation_dataset_copy = training_data.validation_dataset.copy()
 
     for _ in range(args.epochs):
         shuffled = training_dataset_copy.sample(frac=1).reset_index(drop=True)
+        if training_data.early_stop:
+            break
         for index in range(0,shuffled.shape[0],args.batch_size):  
             end = min(shuffled.shape[0], index+args.batch_size)
             layers_copy = copy.deepcopy(training_data.layers)

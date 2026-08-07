@@ -47,4 +47,13 @@ def parse_args():
         help="Learning rate value"
         )
 
+    parser.add_argument(
+        "--patience",
+        type=int,
+        nargs="?",
+        required=False,
+        default=15,
+        help=""
+        )
+
     return parser.parse_args()
