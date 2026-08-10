@@ -137,7 +137,7 @@ def start_training(args):
         shuffled = training_dataset_copy.sample(frac=1).reset_index(drop=True)
         if training_data.early_stop:
             break
-        for index in range(0,shuffled.shape[0],args.batch_size):  
+        for index in range(0,shuffled.shape[0],args.batch_size):
             end = min(shuffled.shape[0], index+args.batch_size)
             layers_copy = copy.deepcopy(training_data.layers)
             for layer in training_data.layers:
@@ -156,15 +156,19 @@ def start_training(args):
         training_data.validation_dataset = validation_dataset_copy
         pass_forward(training_data, False)
 
-    save_to_json(layers)
+    save_to_json(training_data.best_layers)
     display_stats(training_data)
 
 
 def main():
-    args = parse_args()
-    layers = args.layers
-    print(layers)
-    start_training(args)
+    try:
+        args = parse_args()
+        layers = args.layers
+        print(layers)
+        start_training(args)
+    except KeyboardInterrupt:
+        print("Program interrupted")
+        exit(1)
     return
 
 

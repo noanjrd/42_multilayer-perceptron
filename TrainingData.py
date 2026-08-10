@@ -12,3 +12,4 @@ class TrainingData:
         self.epoch_recall_benign = []
         self.best_loss = None
         self.early_stop = False
+        self.best_layers = None

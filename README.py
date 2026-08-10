@@ -1,1 +1,0 @@
-have to restore to the best weights and bias when early stop

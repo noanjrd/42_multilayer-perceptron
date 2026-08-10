@@ -1,6 +1,7 @@
 from TrainingData import TrainingData
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 
 def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
@@ -57,21 +58,23 @@ def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax
     loss_train = -np.mean(y_train * np.log(p_train[:, 0]) + (1 - y_train) * np.log(p_train[:, 1]))
     loss_valid = -np.mean(y_valid * np.log(p_valid[:, 0]) + (1 - y_valid) * np.log(p_valid[:, 1]))
 
-    if training_data.best_loss is None:
+    epoch_loss.append((loss_train, loss_valid))
+
+    if training_data.best_loss is None or loss_valid < training_data.best_loss:
         training_data.best_loss = loss_valid
-    else:
-        training_data.best_loss = min(training_data.best_loss, loss_valid)
+        training_data.best_layers = copy.deepcopy(training_data.layers)
+
+
     if len(epoch_loss) >= patience:
         recent_validation_losses = np.array(epoch_loss[-patience:])[:, 1]
-        training_data.early_stop = np.all(recent_validation_losses >= training_data.best_loss)
+        training_data.early_stop = np.all(recent_validation_losses > training_data.best_loss)
 
-    epoch_loss.append((loss_train, loss_valid))
 
 
 def display_F1(training_data: TrainingData):
     f1_maligant = 2 * (np.array(training_data.epoch_recall_malignant) * np.array(training_data.epoch_accuracy)) / (np.array(training_data.epoch_recall_malignant) + np.array(training_data.epoch_accuracy))
     f1_benign = 2 * (np.array(training_data.epoch_recall_benign) * np.array(training_data.epoch_accuracy)) / (np.array(training_data.epoch_recall_benign) + np.array(training_data.epoch_accuracy))
-
+    print(f"macro F1-score : {(f1_maligant[-1][1] + f1_benign[-1][1]) / 2}")
     plt.plot(f1_maligant[:,0], label="Malignant training F1")
     plt.plot(f1_maligant[:,1], label="Malignant validation F1")
     plt.plot(f1_benign[:,0], label="Benign training F1")
