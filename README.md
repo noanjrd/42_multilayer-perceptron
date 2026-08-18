@@ -168,7 +168,6 @@ concavity, concave points, symmetry, and fractal dimension.
 - Model parameters and predictions are overwritten on each new run.
 - Data splitting and weight initialization are unseeded, so results vary between
   runs.
-- This is an educational implementation. It is not intended for clinical use.
 
 ## Sources
 
@@ -176,3 +175,4 @@ concavity, concave points, symmetry, and fractal dimension.
 - [Multilayer perceptron explanation (YouTube)](https://www.youtube.com/watch?v=VCGlYxGJZ04)
 - [The role of softmax in neural networks](https://www.geeksforgeeks.org/deep-learning/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/)
 - [Multi-layer perceptron learning in TensorFlow](https://www.geeksforgeeks.org/deep-learning/multi-layer-perceptron-learning-in-tensorflow/)
+- [Wisconsin Diagnostic Breast Cancer](https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.names)
