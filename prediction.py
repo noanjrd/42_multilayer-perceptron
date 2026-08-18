@@ -7,31 +7,30 @@ from utils import sigmoid, softmax
 
 def output_layer(data):
     prob = softmax(data)
-    prob = np.where((prob[:,0] < prob[:,1]), 'B', 'M')
-    # prob.to_csv("predictions_result.csv")
+    prob = np.where((prob[:, 0] < prob[:, 1]), 'B', 'M')
     np.savetxt("predictions_result.csv", prob, fmt="%s")
     return
 
 
-def forward_propagation(weights_bias, x_valid: pd.DataFrame ):
+def forward_propagation(weights_bias, x_valid: pd.DataFrame):
+    temp = None
     for i in range(len(weights_bias['weights'])-1):
         if i == 0:
             try:
                 x = x_valid.drop(columns=['diagnosis']).to_numpy()
-            except :
+            except Exception:
                 x = x_valid.to_numpy()
         else:
             x = temp
-        temp = np.empty((len(x_valid),0))
+        temp = np.empty((len(x_valid), 0))
         for neuron_index in range(len(weights_bias['weights'][i])):
-            z = np.dot(x,weights_bias['weights'][i][neuron_index]) + weights_bias['bias'][i][neuron_index]
+            z = np.dot(x, weights_bias['weights'][i][neuron_index]) + weights_bias['bias'][i][neuron_index]
             sig = sigmoid(z)
             temp = np.column_stack((temp, sig))
-            # print("hey")
     x = temp
-    temp = np.empty((len(x_valid),0))
+    temp = np.empty((len(x_valid), 0))
     for neuron_index in range(2):
-        z = np.dot(x,weights_bias['weights'][-1][neuron_index]) + weights_bias['bias'][-1][neuron_index]
+        z = np.dot(x, weights_bias['weights'][-1][neuron_index]) + weights_bias['bias'][-1][neuron_index]
         temp = np.column_stack((temp, z))
     output_layer(temp)
 
@@ -49,6 +48,7 @@ def main():
     weights_bias = open_json()
     forward_propagation(weights_bias, dataset)
     return
+
 
 if __name__ == "__main__":
     main()

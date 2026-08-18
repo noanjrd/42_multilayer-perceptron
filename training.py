@@ -8,10 +8,30 @@ import copy
 from utils import save_to_json, sigmoid, softmax
 
 
-def backpropagation(training_data:TrainingData, current_layer_index:int):
+def adam_update(layer: Layer, gradient_w, gradient_b, learning_rate):
+    beta1 = 0.9
+    beta2 = 0.999
+    eps = 1e-8
+
+    layer.adam_t += 1
+    layer.momentum_w = beta1 * layer.momentum_w + (1 - beta1) * gradient_w
+    layer.momentum_b = beta1 * layer.momentum_b + (1 - beta1) * gradient_b
+    layer.RMSProp_w = beta2 * layer.RMSProp_w + (1 - beta2) * gradient_w**2
+    layer.RMSProp_b = beta2 * layer.RMSProp_b + (1 - beta2) * gradient_b**2
+
+    m_hat_w = layer.momentum_w / (1 - beta1 ** layer.adam_t)
+    m_hat_b = layer.momentum_b / (1 - beta1 ** layer.adam_t)
+    v_hat_w = layer.RMSProp_w / (1 - beta2 ** layer.adam_t)
+    v_hat_b = layer.RMSProp_b / (1 - beta2 ** layer.adam_t)
+
+    layer.weights -= learning_rate * m_hat_w / (np.sqrt(v_hat_w) + eps)
+    layer.bias -= learning_rate * m_hat_b / (np.sqrt(v_hat_b) + eps)
+
+
+def backpropagation(training_data: TrainingData, current_layer_index: int):
     layers = training_data.layers
     args = training_data.args
-    training_dataset =training_data.training_dataset
+    training_dataset = training_data.training_dataset
 
     current_layer = layers[current_layer_index]
     next_layer = layers[current_layer_index + 1]
@@ -20,9 +40,8 @@ def backpropagation(training_data:TrainingData, current_layer_index:int):
 
     weights_temp = np.empty((0, current_layer.weights.shape[1]))
     bias_temp = np.empty(0)
-
     for neuron_index in range(current_layer.number_neurons):
-        delta =  np.sum(next_layer.errors * next_layer.weights[:, neuron_index][:, None], axis=0)
+        delta = np.sum(next_layer.errors * next_layer.weights[:, neuron_index][:, None], axis=0)
         activations = current_layer.activations[neuron_index]
         delta *= (activations * (1 - activations))
         current_layer.errors[neuron_index] = delta
@@ -39,21 +58,20 @@ def backpropagation(training_data:TrainingData, current_layer_index:int):
     if current_layer_index > 0:
         backpropagation(training_data, current_layer_index - 1)
 
-    current_layer.weights -= args.learning_rate * weights_temp
-    current_layer.bias -= args.learning_rate * bias_temp
+    adam_update(current_layer, weights_temp, bias_temp, args.learning_rate)
     return
 
 
-def compute_softmax_final_output(training_data: TrainingData,x_train, x_valid, is_training : bool):
+def compute_softmax_final_output(training_data: TrainingData, x_train, x_valid, is_training: bool):
     layers = training_data.layers
-    table_z_train = np.empty((len(training_data.training_dataset),0))
-    table_z_valid = np.empty((len(training_data.validation_dataset),0))
+    table_z_train = np.empty((len(training_data.training_dataset), 0))
+    table_z_valid = np.empty((len(training_data.validation_dataset), 0))
     for neuron_index, diagnos in enumerate(['M', 'B']):
         z_train = np.dot(x_train, training_data.layers[-1].weights[neuron_index]) + layers[-1].bias[neuron_index]
         z_valid = np.dot(x_valid, layers[-1].weights[neuron_index]) + layers[-1].bias[neuron_index]
         table_z_train = np.column_stack((table_z_train, z_train))
         table_z_valid = np.column_stack((table_z_valid, z_valid))
-        
+
     softmax_outcome_train = softmax(table_z_train)
     if not is_training:
         softmax_outcome_valid = softmax(table_z_valid)
@@ -73,9 +91,9 @@ def final_output(training_data: TrainingData, x_train, x_valid, is_training):
     for neuron_index, diagnos in enumerate(['M', 'B']):
         y = (training_dataset['diagnosis'] == diagnos).astype(int).to_numpy()
 
-        errors = softmax_outcome_train[:,neuron_index] - y  # derivative of BCE 
+        errors = softmax_outcome_train[:, neuron_index] - y  # derivative of BCE
 
-        derivative_of_weights = errors @ layers[-2].activations.T  / training_dataset.shape[0]
+        derivative_of_weights = errors @ layers[-2].activations.T / training_dataset.shape[0]
         derivative_of_bias = errors.mean()
 
         layers[-1].errors[neuron_index] = errors
@@ -83,12 +101,11 @@ def final_output(training_data: TrainingData, x_train, x_valid, is_training):
         bias_temp = np.append(bias_temp, derivative_of_bias)
 
     backpropagation(training_data, len(layers)-2)
-    layers[-1].weights -= args.learning_rate * weights_temp
-    layers[-1].bias -= args.learning_rate * bias_temp
+    adam_update(layers[-1], weights_temp, bias_temp, args.learning_rate)
 
 
 def compute_activations(layer: Layer, x, is_training: bool):
-    res = np.empty((len(x),0))
+    res = np.empty((len(x), 0))
     for neuron_index in range(layer.number_neurons):
         w = layer.weights[neuron_index]
         b = layer.bias[neuron_index]
@@ -126,7 +143,7 @@ def start_training(args):
     print(f"x_valid shape : {x_valid.shape}")
 
     m = len(x_train)
-    layers = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1,len(args.layers))]
+    layers = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1, len(args.layers))]
     layers = [Layer(args.layers[0], m, 30)] + layers + [Layer(2, m, args.layers[-1])]
     training_data = TrainingData(x_train, x_valid,args, layers)
 
@@ -137,12 +154,12 @@ def start_training(args):
         shuffled = training_dataset_copy.sample(frac=1).reset_index(drop=True)
         if training_data.early_stop:
             break
-        for index in range(0,shuffled.shape[0],args.batch_size):
+        for index in range(0, shuffled.shape[0], args.batch_size):
             end = min(shuffled.shape[0], index+args.batch_size)
             layers_copy = copy.deepcopy(training_data.layers)
             for layer in training_data.layers:
-                layer.errors = layer.errors[:,index:end]
-                layer.activations = layer.activations[:,index:end]
+                layer.errors = layer.errors[:, index:end]
+                layer.activations = layer.activations[:, index:end]
             training_data.training_dataset = shuffled[index:end]
             training_data.validation_dataset = shuffled[index:end]
 
@@ -151,9 +168,15 @@ def start_training(args):
             for index, layer in enumerate(training_data.layers):
                 layers_copy[index].bias = layer.bias
                 layers_copy[index].weights = layer.weights
+                layers_copy[index].momentum_w = layer.momentum_w
+                layers_copy[index].momentum_b = layer.momentum_b
+                layers_copy[index].RMSProp_w = layer.RMSProp_w
+                layers_copy[index].RMSProp_b = layer.RMSProp_b
+                layers_copy[index].adam_t = layer.adam_t
             training_data.layers = layers_copy
         training_data.training_dataset = training_dataset_copy
         training_data.validation_dataset = validation_dataset_copy
+
         pass_forward(training_data, False)
 
     save_to_json(training_data.best_layers)

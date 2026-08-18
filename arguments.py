@@ -7,7 +7,7 @@ def parse_args():
         type=int,
         nargs="?", # how many values '?' for 0 or 1, '+' for one or more
         required=False,
-        default=50,
+        default=40,
         help="Number of training epochs"
         )
 
@@ -34,7 +34,7 @@ def parse_args():
         type=int,
         nargs="?",
         required=False,
-        default=10,
+        default=5,
         help="Size of the batches"
         )
     
@@ -43,7 +43,7 @@ def parse_args():
         type=float,
         nargs="?",
         required=False,
-        default=1,
+        default=0.001,
         help="Learning rate value"
         )
 
