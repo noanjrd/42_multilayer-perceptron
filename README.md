@@ -1,4 +1,4 @@
-# Multilayer Perceptron
+# 42_multilayer-perceptron
 
 A neural network built from scratch with NumPy to classify breast tumors as
 malignant (`M`) or benign (`B`). The project implements forward propagation,
