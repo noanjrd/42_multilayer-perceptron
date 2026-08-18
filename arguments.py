@@ -7,7 +7,7 @@ def parse_args():
         type=int,
         nargs="?", # how many values '?' for 0 or 1, '+' for one or more
         required=False,
-        default=40,
+        default=500,
         help="Number of training epochs"
         )
 
@@ -25,7 +25,7 @@ def parse_args():
         type=int,
         nargs="*",
         required=False,
-        default=[2,1],
+        default=[10, 8],
         help="Number of hidden layers and their neurons"
         )
     
@@ -34,7 +34,7 @@ def parse_args():
         type=int,
         nargs="?",
         required=False,
-        default=5,
+        default=16,
         help="Size of the batches"
         )
     
@@ -52,7 +52,7 @@ def parse_args():
         type=int,
         nargs="?",
         required=False,
-        default=15,
+        default=50,
         help=""
         )
 

@@ -10,8 +10,8 @@ sample contains 30 numeric features computed from a digitized image of a breast
 mass.
 
 The main focus of this project is the mathematical side of neural networks. The
-core operations—activation functions, forward propagation, loss calculation,
-backpropagation, gradient computation, and Adam parameter updates—are implemented
+core operations: activation functions, forward propagation, loss calculation,
+backpropagation, gradient computation, and Adam parameter updates. They're all implemented
 directly to make the underlying mathematics explicit and easier to understand.
 
 ## How it works
@@ -57,8 +57,8 @@ This command:
 
 1. reads `data.csv`;
 2. removes the sample ID;
+4. applies min-max normalization to dataset
 3. randomly splits the rows into 80% training and 20% validation sets;
-4. independently applies min-max normalization to each split;
 5. creates `training_dataset.csv` and `validation_dataset.csv`.
 
 The split is random and currently has no fixed seed, so rerunning this command
@@ -86,12 +86,12 @@ Available options:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--epochs` | `40` | Maximum number of training epochs |
+| `--epochs` | `500` | Maximum number of training epochs |
 | `--dataset` | `training_dataset.csv validation_dataset.csv` | Training and validation CSV paths, in that order |
-| `--layers` | `2 1` | Neuron count for each hidden layer |
-| `--batch_size` | `5` | Number of samples per parameter update |
+| `--layers` | `10 8` | Neuron count for each hidden layer |
+| `--batch_size` | `16` | Number of samples per parameter update |
 | `--learning_rate` | `0.001` | Adam learning rate |
-| `--patience` | `15` | Epoch window used for early stopping |
+| `--patience` | `50` | Validation-loss window used for early stopping |
 
 For example, use alternative prepared datasets with:
 
@@ -101,19 +101,18 @@ python3 training.py --dataset train.csv validation.csv
 
 Training writes the best model to `weights_bias.json`. When training finishes,
 it prints the macro validation F1 score and opens plots for loss, accuracy,
-precision/recall, and F1. In a headless environment, set a non-interactive
-Matplotlib backend if necessary:
-
-```bash
-MPLBACKEND=Agg python3 training.py
-```
+precision/recall, and F1.
 
 ### Training statistics
+
+The model achieved a macro validation F1 score of **0.97** in the example run
+shown below. Because the data split and parameter initialization are random,
+the exact score may vary between runs.
 
 The following plot shows an example run's training and validation loss,
 accuracy, per-class precision and recall, and per-class validation F1 score:
 
-![Training and validation statistics](images/stats.png)
+![Training and validation statistics](readme_images/graph.png)
 
 ### 3. Make predictions
 

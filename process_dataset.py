@@ -69,9 +69,8 @@ def main():
     dataset = pd.read_csv("data.csv", header=None)
     dataset.columns = columns
     dataset = dataset.drop(['id'], axis=1)
+    normalize_dataset(dataset)
     x_train, x_validation = split_dataset(dataset)
-    normalize_dataset(x_train)
-    normalize_dataset(x_validation)
 
     create_validation_dataset(x_validation)
     create_training_dataset(x_train)
