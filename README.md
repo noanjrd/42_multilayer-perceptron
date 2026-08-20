@@ -164,6 +164,7 @@ concavity, concave points, symmetry, and fractal dimension.
 
 ## Notes
 
+- Static type checking was performed with [mypy](https://www.mypy-lang.org/).
 - Model parameters and predictions are overwritten on each new run.
 - Data splitting and weight initialization are unseeded, so results vary between
   runs.

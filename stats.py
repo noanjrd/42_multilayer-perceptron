@@ -2,19 +2,20 @@ from TrainingData import TrainingData
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+import pandas as pd
 
 
-def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+def compute_stats(training_data: TrainingData,  softmax_prob_train: np.ndarray, softmax_prob_valid: np.ndarray) -> None:
     """Compute and record all training and validation metrics for one epoch."""
     compute_stats_loss(training_data, softmax_prob_train, softmax_prob_valid)
     compute_stats_accuracy(training_data, softmax_prob_train, softmax_prob_valid)
-    compute_stats_precision(training_data, softmax_prob_train, softmax_prob_valid)
+    compute_stats_precision(training_data, softmax_prob_valid)
     compute_recall_score(training_data, softmax_prob_train, softmax_prob_valid)
     print(f"epoch {len(training_data.epoch_loss)}/{training_data.args.epochs} - "
           f"loss: {training_data.epoch_loss[-1][0]:.4f} - val_loss : {training_data.epoch_loss[-1][1]:.4f}")
 
 
-def compute_recall_score(training_data: TrainingData, softmax_prob_train, softmax_prob_valid):
+def compute_recall_score(training_data: TrainingData, softmax_prob_train: np.ndarray, softmax_prob_valid: np.ndarray) -> None:
     """Record per-class recall for the current training and validation outputs."""
     y_train = training_data.training_dataset['diagnosis']
     y_valid = training_data.validation_dataset['diagnosis']
@@ -34,7 +35,7 @@ def compute_recall_score(training_data: TrainingData, softmax_prob_train, softma
             training_data.epoch_recall_benign.append((recall_train, recall_valid))
 
 
-def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train: np.ndarray, softmax_prob_valid: np.ndarray) -> None:
     """Record classification accuracy for the training and validation datasets."""
     prediction_train = np.where(softmax_prob_train[:, 0] > softmax_prob_train[:, 1], 'M', 'B')
     prediction_valid = np.where(softmax_prob_valid[:, 0] > softmax_prob_valid[:, 1], 'M', 'B')
@@ -48,14 +49,16 @@ def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, sof
     return
 
 
-def compute_stats_precision(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+def compute_stats_precision(training_data: TrainingData, softmax_prob_valid: np.ndarray) -> None:
     """Record validation precision for the malignant and benign classes."""
-    prediction_valid = np.where(softmax_prob_valid[:, 0] > softmax_prob_valid[:, 1], 'M', 'B')
-    m_indices_valid = np.where(prediction_valid == 'M')[0]
-    b_indices_valid = np.where(prediction_valid == 'B')[0]
-    validation_dataset_m = training_data.validation_dataset.iloc[m_indices_valid]
-    validation_dataset_b = training_data.validation_dataset.iloc[b_indices_valid]
+    prediction_valid: np.ndarray = np.where(softmax_prob_valid[:, 0] > softmax_prob_valid[:, 1], 'M', 'B')
+    m_indices_valid: np.ndarray = np.where(prediction_valid == 'M')[0]
+    b_indices_valid: np.ndarray = np.where(prediction_valid == 'B')[0]
+    validation_dataset_m: pd.DataFrame = training_data.validation_dataset.iloc[m_indices_valid]
+    validation_dataset_b: pd.DataFrame = training_data.validation_dataset.iloc[b_indices_valid]
 
+    percentage_m: float
+    percentage_b: float
     if len(m_indices_valid) > 0:
         percentage_m = len(validation_dataset_m[validation_dataset_m['diagnosis'] == 'M']) / len(m_indices_valid)
     else:
@@ -68,7 +71,7 @@ def compute_stats_precision(training_data: TrainingData,  softmax_prob_train, so
     training_data.epoch_precision.append((percentage_m, percentage_b))
 
 
-def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+def compute_stats_loss(training_data: TrainingData,  softmax_prob_train: np.ndarray, softmax_prob_valid: np.ndarray) -> None:
     """Record cross-entropy losses and update early-stopping state."""
     training_dataset = training_data.training_dataset
     validation_dataset = training_data.validation_dataset
@@ -91,10 +94,10 @@ def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax
 
     if len(epoch_loss) >= patience:
         recent_validation_losses = np.array(epoch_loss[-patience:])[:, 1]
-        training_data.early_stop = np.all(recent_validation_losses > training_data.best_loss)
+        training_data.early_stop = bool(np.all(recent_validation_losses > training_data.best_loss))
 
 
-def display_stats(training_data: TrainingData):
+def display_stats(training_data: TrainingData) -> None:
     """Print the final macro F1 score and plot metric histories by epoch."""
     loss = np.array(training_data.epoch_loss)
     accuracy = np.array(training_data.epoch_accuracy)

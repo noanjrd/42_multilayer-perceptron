@@ -54,7 +54,7 @@ def parse_args():
         type=int,
         nargs="?",
         required=False,
-        default=50,
+        default=20,
         help=""
         )
 

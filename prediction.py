@@ -13,20 +13,16 @@ def output_layer(data):
     return
 
 
-def forward_propagation(weights_bias, x_valid: pd.DataFrame):
+def forward_propagation(weights_bias, x_valid: pd.DataFrame) -> None:
     """Run inference using serialized weights and write predicted labels.
 
     The input may include a ``diagnosis`` column, which is ignored when present.
     Hidden layers use sigmoid activations and the two-neuron output layer uses
     softmax classification.
     """
-    temp = None
-    if "diagnosis" in x_valid.columns:
-        x = x_valid.drop(columns=['diagnosis'])
-    x = x.to_numpy()
+    temp: np.ndarray = x_valid.drop(columns=["diagnosis"], errors="ignore").to_numpy()
     for i in range(len(weights_bias['weights'])-1):
-        if i != 0:
-            x = temp
+        x = temp
         temp = np.empty((len(x_valid), 0))
         for neuron_index in range(len(weights_bias['weights'][i])):
             z = np.dot(x, weights_bias['weights'][i][neuron_index]) + weights_bias['bias'][i][neuron_index]
@@ -61,8 +57,6 @@ def main():
     except Exception:
         print("Error")
         exit(1)
-
-    return
 
 
 if __name__ == "__main__":

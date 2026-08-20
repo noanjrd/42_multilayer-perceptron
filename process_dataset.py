@@ -38,7 +38,7 @@ columns = [
 ]
 
 
-def normalize_dataset(data: pd.DataFrame):
+def normalize_dataset(data: pd.DataFrame) -> None:
     """Min-max normalize feature columns in place, preserving diagnosis labels."""
     for col in data.columns:
         if col in ['diagnosis']:
@@ -48,19 +48,19 @@ def normalize_dataset(data: pd.DataFrame):
         data[col] = (data[col] - min) / (max - min)
 
 
-def create_validation_dataset(dataset: pd.DataFrame):
+def create_validation_dataset(dataset: pd.DataFrame) -> None:
     """Write the validation split to ``validation_dataset.csv``."""
     dataset.to_csv("validation_dataset.csv", index=False)
     return
 
 
-def create_training_dataset(dataset):
+def create_training_dataset(dataset: pd.DataFrame) -> None:
     """Write the training split to ``training_dataset.csv``."""
     dataset.to_csv("training_dataset.csv", index=False)
     return
 
 
-def split_dataset(dataset):
+def split_dataset(dataset: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Shuffle a dataset and return random 80/20 training and validation splits."""
     dataset = dataset.sample(n=len(dataset))
     data_80 = math.floor(len(dataset) * 0.8)
@@ -69,7 +69,7 @@ def split_dataset(dataset):
     return x_train, x_prediction
 
 
-def main():
+def main() -> None:
     dataset = pd.read_csv("data.csv", header=None)
     dataset.columns = columns
     dataset = dataset.drop(['id'], axis=1)

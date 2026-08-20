@@ -5,10 +5,11 @@ from TrainingData import TrainingData
 from arguments import parse_args
 from stats import compute_stats, display_stats
 import copy
+import argparse
 from utils import save_to_json, sigmoid, softmax
 
 
-def adam_update(layer: Layer, gradient_w, gradient_b, learning_rate):
+def adam_update(layer: Layer, gradient_w: np.ndarray, gradient_b: np.ndarray, learning_rate: float) -> None:
     """Apply one in-place Adam optimizer update to a layer's parameters."""
     beta1 = 0.9
     beta2 = 0.999
@@ -29,7 +30,7 @@ def adam_update(layer: Layer, gradient_w, gradient_b, learning_rate):
     layer.bias -= learning_rate * m_hat_b / (np.sqrt(v_hat_b) + eps)
 
 
-def backpropagation(training_data: TrainingData, current_layer_index: int):
+def backpropagation(training_data: TrainingData, current_layer_index: int) -> None:
     """Backpropagate errors through hidden layers and update their parameters.
 
     Args:
@@ -66,10 +67,9 @@ def backpropagation(training_data: TrainingData, current_layer_index: int):
         backpropagation(training_data, current_layer_index - 1)
 
     adam_update(current_layer, weights_temp, bias_temp, args.learning_rate)
-    return
 
 
-def compute_softmax_final_output(training_data: TrainingData, x_train, x_valid, is_training: bool):
+def compute_softmax_final_output(training_data: TrainingData, x_train, x_valid, is_training: bool) -> np.ndarray:
     """Compute output probabilities and optionally record epoch metrics.
 
     Returns:
@@ -118,7 +118,7 @@ def final_output(training_data: TrainingData, x_train, x_valid, is_training):
     adam_update(layers[-1], weights_temp, bias_temp, args.learning_rate)
 
 
-def compute_activations(layer: Layer, x, is_training: bool):
+def compute_activations(layer: Layer, x, is_training: bool) -> np.ndarray:
     """Compute a hidden layer's sigmoid activations.
 
     When ``is_training`` is true, the activations are also cached on the layer
@@ -137,7 +137,7 @@ def compute_activations(layer: Layer, x, is_training: bool):
     return res
 
 
-def pass_forward(training_data: TrainingData, is_training: bool):
+def pass_forward(training_data: TrainingData, is_training: bool) -> None:
     """Run a forward pass and update the network when in training mode."""
     layers = training_data.layers
     training_dataset = training_data.training_dataset
@@ -157,14 +157,14 @@ def pass_forward(training_data: TrainingData, is_training: bool):
     final_output(training_data, x_train, x_valid, is_training)
 
 
-def start_training(args):
+def start_training(args: argparse.Namespace) -> None:
     """Train a network from CLI configuration, save it, and display metrics."""
     x_train, x_valid = pd.read_csv(args.dataset[0]), pd.read_csv(args.dataset[1])
     print(f"x_train shape : {x_train.shape}")
     print(f"x_valid shape : {x_valid.shape}")
 
     m = len(x_train)
-    layers = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1, len(args.layers))]
+    layers: list[Layer] = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1, len(args.layers))]
     layers = [Layer(args.layers[0], m, 30)] + layers + [Layer(2, m, args.layers[-1])]
     training_data = TrainingData(x_train, x_valid, args, layers)
 
@@ -173,7 +173,7 @@ def start_training(args):
 
     for _ in range(args.epochs):
         shuffled = training_dataset_copy.sample(frac=1).reset_index(drop=True)
-        if training_data.early_stop:
+        if training_data.early_stop is True:
             break
         for index in range(0, shuffled.shape[0], args.batch_size):
             end = min(shuffled.shape[0], index+args.batch_size)
@@ -194,8 +194,8 @@ def start_training(args):
         training_data.validation_dataset = validation_dataset_copy
 
         pass_forward(training_data, False)
-
-    save_to_json(training_data.best_layers)
+    if training_data.best_layers is not None:
+        save_to_json(training_data.best_layers)
     display_stats(training_data)
 
 
