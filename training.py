@@ -9,6 +9,7 @@ from utils import save_to_json, sigmoid, softmax
 
 
 def adam_update(layer: Layer, gradient_w, gradient_b, learning_rate):
+    """Apply one in-place Adam optimizer update to a layer's parameters."""
     beta1 = 0.9
     beta2 = 0.999
     eps = 1e-8
@@ -29,6 +30,12 @@ def adam_update(layer: Layer, gradient_w, gradient_b, learning_rate):
 
 
 def backpropagation(training_data: TrainingData, current_layer_index: int):
+    """Backpropagate errors through hidden layers and update their parameters.
+
+    Args:
+        training_data: Shared datasets, layers, and training configuration.
+        current_layer_index: Hidden-layer index at which propagation begins.
+    """
     layers = training_data.layers
     args = training_data.args
     training_dataset = training_data.training_dataset
@@ -63,6 +70,12 @@ def backpropagation(training_data: TrainingData, current_layer_index: int):
 
 
 def compute_softmax_final_output(training_data: TrainingData, x_train, x_valid, is_training: bool):
+    """Compute output probabilities and optionally record epoch metrics.
+
+    Returns:
+        An array containing malignant and benign probabilities for each
+        training sample.
+    """
     layers = training_data.layers
     table_z_train = np.empty((len(training_data.training_dataset), 0))
     table_z_valid = np.empty((len(training_data.validation_dataset), 0))
@@ -80,6 +93,7 @@ def compute_softmax_final_output(training_data: TrainingData, x_train, x_valid, 
 
 
 def final_output(training_data: TrainingData, x_train, x_valid, is_training):
+    """Compute output-layer gradients and update all network layers."""
     layers = training_data.layers
     training_dataset = training_data.training_dataset
     args = training_data.args
@@ -105,6 +119,11 @@ def final_output(training_data: TrainingData, x_train, x_valid, is_training):
 
 
 def compute_activations(layer: Layer, x, is_training: bool):
+    """Compute a hidden layer's sigmoid activations.
+
+    When ``is_training`` is true, the activations are also cached on the layer
+    for use during backpropagation.
+    """
     res = np.empty((len(x), 0))
     for neuron_index in range(layer.number_neurons):
         w = layer.weights[neuron_index]
@@ -119,6 +138,7 @@ def compute_activations(layer: Layer, x, is_training: bool):
 
 
 def pass_forward(training_data: TrainingData, is_training: bool):
+    """Run a forward pass and update the network when in training mode."""
     layers = training_data.layers
     training_dataset = training_data.training_dataset
     validation_dataset = training_data.validation_dataset
@@ -138,6 +158,7 @@ def pass_forward(training_data: TrainingData, is_training: bool):
 
 
 def start_training(args):
+    """Train a network from CLI configuration, save it, and display metrics."""
     x_train, x_valid = pd.read_csv(args.dataset[0]), pd.read_csv(args.dataset[1])
     print(f"x_train shape : {x_train.shape}")
     print(f"x_valid shape : {x_valid.shape}")
@@ -145,7 +166,7 @@ def start_training(args):
     m = len(x_train)
     layers = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1, len(args.layers))]
     layers = [Layer(args.layers[0], m, 30)] + layers + [Layer(2, m, args.layers[-1])]
-    training_data = TrainingData(x_train, x_valid,args, layers)
+    training_data = TrainingData(x_train, x_valid, args, layers)
 
     training_dataset_copy = training_data.training_dataset.copy()
     validation_dataset_copy = training_data.validation_dataset.copy()
@@ -166,13 +187,8 @@ def start_training(args):
             pass_forward(training_data, True)
 
             for index, layer in enumerate(training_data.layers):
-                layers_copy[index].bias = layer.bias
-                layers_copy[index].weights = layer.weights
-                layers_copy[index].momentum_w = layer.momentum_w
-                layers_copy[index].momentum_b = layer.momentum_b
-                layers_copy[index].RMSProp_w = layer.RMSProp_w
-                layers_copy[index].RMSProp_b = layer.RMSProp_b
-                layers_copy[index].adam_t = layer.adam_t
+                layers_copy[index].copy_layer(layer)
+
             training_data.layers = layers_copy
         training_data.training_dataset = training_dataset_copy
         training_data.validation_dataset = validation_dataset_copy

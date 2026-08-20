@@ -6,6 +6,7 @@ from utils import sigmoid, softmax
 
 
 def output_layer(data):
+    """Convert output logits to diagnosis labels and write the predictions CSV."""
     prob = softmax(data)
     prob = np.where((prob[:, 0] < prob[:, 1]), 'B', 'M')
     np.savetxt("predictions_result.csv", prob, fmt="%s")
@@ -13,14 +14,18 @@ def output_layer(data):
 
 
 def forward_propagation(weights_bias, x_valid: pd.DataFrame):
+    """Run inference using serialized weights and write predicted labels.
+
+    The input may include a ``diagnosis`` column, which is ignored when present.
+    Hidden layers use sigmoid activations and the two-neuron output layer uses
+    softmax classification.
+    """
     temp = None
+    if "diagnosis" in x_valid.columns:
+        x = x_valid.drop(columns=['diagnosis'])
+    x = x.to_numpy()
     for i in range(len(weights_bias['weights'])-1):
-        if i == 0:
-            try:
-                x = x_valid.drop(columns=['diagnosis']).to_numpy()
-            except Exception:
-                x = x_valid.to_numpy()
-        else:
+        if i != 0:
             x = temp
         temp = np.empty((len(x_valid), 0))
         for neuron_index in range(len(weights_bias['weights'][i])):
@@ -36,17 +41,27 @@ def forward_propagation(weights_bias, x_valid: pd.DataFrame):
 
 
 def open_json():
+    """Load model weights and biases from ``weights_bias.json``."""
     with open('weights_bias.json', 'r') as f:
         data = json.load(f)
     return data
 
 
 def main():
-    argv = sys.argv
-    file_name = argv[1]
-    dataset = pd.read_csv(file_name)
-    weights_bias = open_json()
-    forward_propagation(weights_bias, dataset)
+    try:
+        argv = sys.argv
+        assert len(argv) == 2, "Need one argument, the dataset the program will make the predictions on"
+        file_name = argv[1]
+        dataset = pd.read_csv(file_name)
+        weights_bias = open_json()
+        forward_propagation(weights_bias, dataset)
+    except AssertionError as e:
+        print("Error:", e)
+        exit(1)
+    except Exception:
+        print("Error")
+        exit(1)
+
     return
 
 

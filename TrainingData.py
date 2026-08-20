@@ -2,7 +2,10 @@ from Layer import Layer
 
 
 class TrainingData:
+    """Bundle datasets, model state, and metrics used during training."""
+
     def __init__(self, training_dataset, validation_dataset, args, layers: list[Layer]):
+        """Initialize the mutable state shared by the training pipeline."""
         self.training_dataset = training_dataset
         self.validation_dataset = validation_dataset
         self.args = args

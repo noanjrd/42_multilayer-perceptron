@@ -5,6 +5,7 @@ import copy
 
 
 def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+    """Compute and record all training and validation metrics for one epoch."""
     compute_stats_loss(training_data, softmax_prob_train, softmax_prob_valid)
     compute_stats_accuracy(training_data, softmax_prob_train, softmax_prob_valid)
     compute_stats_precision(training_data, softmax_prob_train, softmax_prob_valid)
@@ -14,6 +15,7 @@ def compute_stats(training_data: TrainingData,  softmax_prob_train, softmax_prob
 
 
 def compute_recall_score(training_data: TrainingData, softmax_prob_train, softmax_prob_valid):
+    """Record per-class recall for the current training and validation outputs."""
     y_train = training_data.training_dataset['diagnosis']
     y_valid = training_data.validation_dataset['diagnosis']
 
@@ -33,6 +35,7 @@ def compute_recall_score(training_data: TrainingData, softmax_prob_train, softma
 
 
 def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+    """Record classification accuracy for the training and validation datasets."""
     prediction_train = np.where(softmax_prob_train[:, 0] > softmax_prob_train[:, 1], 'M', 'B')
     prediction_valid = np.where(softmax_prob_valid[:, 0] > softmax_prob_valid[:, 1], 'M', 'B')
     prediction_train = np.where(training_data.training_dataset['diagnosis'] == prediction_train, True, False)
@@ -46,6 +49,7 @@ def compute_stats_accuracy(training_data: TrainingData,  softmax_prob_train, sof
 
 
 def compute_stats_precision(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+    """Record validation precision for the malignant and benign classes."""
     prediction_valid = np.where(softmax_prob_valid[:, 0] > softmax_prob_valid[:, 1], 'M', 'B')
     m_indices_valid = np.where(prediction_valid == 'M')[0]
     b_indices_valid = np.where(prediction_valid == 'B')[0]
@@ -65,6 +69,7 @@ def compute_stats_precision(training_data: TrainingData,  softmax_prob_train, so
 
 
 def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax_prob_valid):
+    """Record cross-entropy losses and update early-stopping state."""
     training_dataset = training_data.training_dataset
     validation_dataset = training_data.validation_dataset
     epoch_loss = training_data.epoch_loss
@@ -90,6 +95,7 @@ def compute_stats_loss(training_data: TrainingData,  softmax_prob_train, softmax
 
 
 def display_stats(training_data: TrainingData):
+    """Print the final macro F1 score and plot metric histories by epoch."""
     loss = np.array(training_data.epoch_loss)
     accuracy = np.array(training_data.epoch_accuracy)
     precision = np.array(training_data.epoch_precision)
