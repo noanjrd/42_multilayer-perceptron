@@ -17,9 +17,7 @@ def output_layer(y_true, data):
     eps = 1e-15
     p = np.clip(p, eps, 1 - eps)
     loss = -np.mean(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
-    # loss = 
-    print(loss)
-    # np.savetxt("predictions_result.csv", final_result, fmt="%s")
+    print(f"Loss: {loss:.4f}")
     return
 
 
@@ -45,7 +43,7 @@ def forward_propagation(weights_bias, x_valid: pd.DataFrame) -> None:
         z = np.dot(x, weights_bias['weights'][-1][neuron_index]) + weights_bias['bias'][-1][neuron_index]
         # sig = sigmoid(z)
         temp = np.column_stack((temp, z))
-    print(temp)
+    # print(temp)
     output_layer(y_true, temp)
 
 

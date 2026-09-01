@@ -18,10 +18,12 @@ directly to make the underlying mathematics explicit and easier to understand.
 
 The network consists of:
 
-- 30 input features;
+- 30 input features
 - one or more configurable fully connected hidden layers with sigmoid
-  activations;
-- a two-neuron output layer with softmax probabilities for `M` and `B`.
+  activations
+- a two-neuron output layer with softmax probabilities for `M` and `B`
+
+![Neural-network architecture](readme_images/neural_network.png)
 
 Training minimizes binary cross-entropy through backpropagation and updates the
 parameters with Adam. At the end of each epoch, the program reports training and
@@ -75,23 +77,23 @@ line:
 
 ```bash
 python3 training.py \
-  --epochs 100 \
-  --layers 16 8 \
-  --batch_size 16 \
+  --epochs 250 \
+  --layers 20 20 20 \
+  --batch_size 8 \
   --learning_rate 0.001 \
-  --patience 20
+  --patience 30
 ```
 
 Available options:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--epochs` | `500` | Maximum number of training epochs |
+| `--epochs` | `250` | Maximum number of training epochs |
 | `--dataset` | `training_dataset.csv validation_dataset.csv` | Training and validation CSV paths, in that order |
-| `--layers` | `10 8` | Neuron count for each hidden layer |
-| `--batch_size` | `16` | Number of samples per parameter update |
+| `--layers` | `20 20 20` | Neuron count for each hidden layer |
+| `--batch_size` | `8` | Number of samples per parameter update |
 | `--learning_rate` | `0.001` | Adam learning rate |
-| `--patience` | `50` | Validation-loss window used for early stopping |
+| `--patience` | `30` | Validation-loss window used for early stopping |
 
 For example, use alternative prepared datasets with:
 
@@ -120,11 +122,11 @@ accuracy, per-class precision and recall, and per-class validation F1 score:
 python3 prediction.py validation_dataset.csv
 ```
 
-Prediction loads `weights_bias.json` from the current directory and creates
-`predictions_result.csv`. The output contains one predicted label (`M` or `B`)
-per line and has no header. The input may include a `diagnosis` column; it is
-ignored during inference. Otherwise, it must contain the same 30 normalized
-feature columns, in the same order used for training.
+Prediction loads `weights_bias.json` from the current directory, runs a forward
+pass on a labeled dataset, and prints its mean cross-entropy loss. The input
+must include the `diagnosis` column and the same 30 normalized feature columns,
+in the same order used for training. It does not currently write predicted
+labels to a file.
 
 ## Dataset format
 
@@ -147,7 +149,6 @@ concavity, concave points, symmetry, and fractal dimension.
 | `training_dataset.csv` | `process_dataset.py` | Normalized training split |
 | `validation_dataset.csv` | `process_dataset.py` | Normalized validation split |
 | `weights_bias.json` | `training.py` | Weights and biases from the best validation epoch |
-| `predictions_result.csv` | `prediction.py` | Predicted class labels |
 
 ## Project structure
 
@@ -155,7 +156,7 @@ concavity, concave points, symmetry, and fractal dimension.
 | --- | --- |
 | `process_dataset.py` | Loads, splits, and normalizes the raw dataset |
 | `training.py` | Forward pass, backpropagation, Adam updates, and training loop |
-| `prediction.py` | Loads a saved model and performs inference |
+| `prediction.py` | Loads a saved model and reports loss for a labeled dataset |
 | `Layer.py` | Stores layer parameters, activations, gradients, and Adam state |
 | `TrainingData.py` | Holds datasets, layers, metrics, and early-stopping state |
 | `stats.py` | Computes and plots evaluation metrics |
@@ -165,7 +166,7 @@ concavity, concave points, symmetry, and fractal dimension.
 ## Notes
 
 - Static type checking was performed with [mypy](https://www.mypy-lang.org/).
-- Model parameters and predictions are overwritten on each new run.
+- Model parameters are overwritten on each new training run.
 - Data splitting and weight initialization are unseeded, so results vary between
   runs.
 

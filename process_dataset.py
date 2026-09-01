@@ -63,7 +63,7 @@ def create_training_dataset(dataset: pd.DataFrame) -> None:
 def split_dataset(dataset: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Shuffle a dataset and return random 80/20 training and validation splits."""
     dataset = dataset.sample(n=len(dataset))
-    data_80 = math.floor(len(dataset) * 0.8)
+    data_80 = math.floor(len(dataset) * 0.80)
     x_train = dataset[0:data_80]
     x_prediction = dataset[data_80:len(dataset)]
     return x_train, x_prediction
