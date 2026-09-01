@@ -23,7 +23,6 @@ The network consists of:
   activations
 - a two-neuron output layer with softmax probabilities for `M` and `B`
 
-![Neural-network architecture](readme_images/neural_network.png)
 
 Training minimizes binary cross-entropy through backpropagation and updates the
 parameters with Adam. At the end of each epoch, the program reports training and

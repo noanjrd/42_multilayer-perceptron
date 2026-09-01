@@ -3,15 +3,14 @@ import pandas as pd
 import numpy as np
 import sys
 from utils import sigmoid, softmax
-import math
 
 
 def output_layer(y_true, data):
     """Convert output logits to diagnosis labels and write the predictions CSV."""
     y_true = (y_true == 'M').astype(int)
-    
+
     prob = softmax(data)
-    
+
     p = prob[:, 0]  # probability of M
 
     eps = 1e-15
