@@ -106,7 +106,7 @@ precision/recall, and F1.
 
 ### Training statistics
 
-The model achieved a macro validation F1 score of **0.97** in the example run
+The model achieved a macro validation F1 score of **0.99** in the example run
 shown below. Because the data split and parameter initialization are random,
 the exact score may vary between runs.
 
