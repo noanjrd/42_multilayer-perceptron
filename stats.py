@@ -11,7 +11,7 @@ def compute_stats(training_data: TrainingData,  softmax_prob_train: np.ndarray, 
     compute_stats_accuracy(training_data, softmax_prob_train, softmax_prob_valid)
     compute_stats_precision(training_data, softmax_prob_valid)
     compute_recall_score(training_data, softmax_prob_train, softmax_prob_valid)
-    print(f"epoch {len(training_data.epoch_loss)}/{training_data.args.epochs} - "
+    print(f"epoch {len(training_data.epoch_loss)}/{training_data.args.epochs[0]} - "
           f"loss: {training_data.epoch_loss[-1][0]:.4f} - val_loss : {training_data.epoch_loss[-1][1]:.4f}")
 
 

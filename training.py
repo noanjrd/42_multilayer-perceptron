@@ -171,7 +171,7 @@ def start_training(args: argparse.Namespace) -> None:
     training_dataset_copy = training_data.training_dataset.copy()
     validation_dataset_copy = training_data.validation_dataset.copy()
 
-    for _ in range(args.epochs):
+    for _ in range(args.epochs[0]):
         shuffled = training_dataset_copy.sample(frac=1).reset_index(drop=True)
         if training_data.early_stop is True:
             break
@@ -202,11 +202,12 @@ def start_training(args: argparse.Namespace) -> None:
 def main():
     try:
         args = parse_args()
-        layers = args.layers
-        print(layers)
         start_training(args)
     except KeyboardInterrupt:
         print("Program interrupted")
+        exit(1)
+    except Exception:
+        print("Error")
         exit(1)
     return
 

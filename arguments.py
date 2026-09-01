@@ -7,9 +7,9 @@ def parse_args():
     parser.add_argument(
         "--epochs",
         type=int,
-        nargs="?",  # how many values '?' for 0 or 1, '+' for one or more
+        nargs=1,  # how many values '?' for 0 or 1, '+' for one or more
         required=False,
-        default=250,
+        default=[250],
         help="Number of training epochs"
         )
 
