@@ -21,7 +21,7 @@ def adam_update(layer: Layer, gradient_w: np.ndarray, gradient_b: np.ndarray, le
     layer.RMSProp_w = beta2 * layer.RMSProp_w + (1 - beta2) * gradient_w**2
     layer.RMSProp_b = beta2 * layer.RMSProp_b + (1 - beta2) * gradient_b**2
 
-    m_hat_w = layer.momentum_w / (1 - beta1 ** layer.adam_t)
+    m_hat_w = layer.momentum_w / (1 - beta1 ** layer.adam_t)  # makes the momentum bigger at the begging
     m_hat_b = layer.momentum_b / (1 - beta1 ** layer.adam_t)
     v_hat_w = layer.RMSProp_w / (1 - beta2 ** layer.adam_t)
     v_hat_b = layer.RMSProp_b / (1 - beta2 ** layer.adam_t)
@@ -51,7 +51,7 @@ def backpropagation(training_data: TrainingData, current_layer_index: int) -> No
     for neuron_index in range(current_layer.number_neurons):
         delta = np.sum(next_layer.errors * next_layer.weights[:, neuron_index][:, None], axis=0)
         activations = current_layer.activations[neuron_index]
-        delta *= (activations * (1 - activations))
+        delta *= (activations * (1 - activations))  # derivative of sigmoid
         current_layer.errors[neuron_index] = delta
 
         if current_layer_index != 0:
