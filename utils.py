@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def normalize_dataset(dataset: pd.DataFrame, mins_and_maxs: list[tuple[int, int]] = None) -> None:
+def normalize_dataset(dataset: pd.DataFrame, mins_and_maxs: list[tuple[int, int]] | None = None) -> list:
     """Min-max normalize feature columns in place, preserving diagnosis labels."""
     new_mins_maxs = []
     i = 0
