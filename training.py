@@ -1,3 +1,4 @@
+from utils import save_to_json, sigmoid, softmax, normalize_dataset, columns
 import pandas as pd
 import numpy as np
 from Layer import Layer
@@ -6,7 +7,6 @@ from arguments import parse_args
 from stats import compute_stats, display_stats
 import copy
 import argparse
-from utils import save_to_json, sigmoid, softmax
 
 
 def adam_update(layer: Layer, gradient_w: np.ndarray, gradient_b: np.ndarray, learning_rate: float) -> None:
@@ -157,16 +157,28 @@ def pass_forward(training_data: TrainingData, is_training: bool) -> None:
     final_output(training_data, x_train, x_valid, is_training)
 
 
-def start_training(args: argparse.Namespace) -> None:
-    """Train a network from CLI configuration, save it, and display metrics."""
+def initalization(args: argparse.Namespace):
     x_train, x_valid = pd.read_csv(args.dataset[0]), pd.read_csv(args.dataset[1])
-    print(f"x_train shape : {x_train.shape}")
-    print(f"x_valid shape : {x_valid.shape}")
+    x_train.columns = columns
+    x_valid.columns = columns
+    x_train = x_train.drop("id", axis=1)
+    x_valid = x_valid.drop("id", axis=1)
+    mins_and_maxs = normalize_dataset(x_train)
+    normalize_dataset(x_valid, mins_and_maxs)
 
     m = len(x_train)
     layers: list[Layer] = [Layer(args.layers[i], m, args.layers[i-1]) for i in range(1, len(args.layers))]
     layers = [Layer(args.layers[0], m, 30)] + layers + [Layer(2, m, args.layers[-1])]
     training_data = TrainingData(x_train, x_valid, args, layers)
+
+    return x_train, x_valid, training_data, mins_and_maxs
+
+def start_training(args: argparse.Namespace) -> None:
+    """Train a network from CLI configuration, save it, and display metrics."""
+    x_train, x_valid, training_data, mins_and_maxs = initalization(args)
+
+    print(f"x_train shape : {x_train.shape}")
+    print(f"x_valid shape : {x_valid.shape}")
 
     training_dataset_copy = training_data.training_dataset.copy()
     validation_dataset_copy = training_data.validation_dataset.copy()
@@ -195,7 +207,7 @@ def start_training(args: argparse.Namespace) -> None:
 
         pass_forward(training_data, False)
     if training_data.best_layers is not None:
-        save_to_json(training_data.best_layers)
+        save_to_json(training_data.best_layers, mins_and_maxs)
     display_stats(training_data)
 
 
@@ -206,9 +218,9 @@ def main():
     except KeyboardInterrupt:
         print("Program interrupted")
         exit(1)
-    except Exception:
-        print("Error")
-        exit(1)
+    # except Exception:
+    #     print("Error")
+    #     exit(1)
     return
 
 

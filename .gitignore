@@ -6,3 +6,6 @@ training_dataset.csv
 weights_bias.json
 predictions_result.csv
 test.csv
+data_test.csv
+data_training.csv
+scales.json

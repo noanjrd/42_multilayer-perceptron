@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 import sys
-from utils import sigmoid, softmax
+from utils import sigmoid, softmax, normalize_dataset, columns
 
 
 def output_layer(y_true, data):
@@ -49,8 +49,11 @@ def forward_propagation(weights_bias, x_valid: pd.DataFrame) -> None:
 def open_json():
     """Load model weights and biases from ``weights_bias.json``."""
     with open('weights_bias.json', 'r') as f:
-        data = json.load(f)
-    return data
+        weights_bias = json.load(f)
+    with open('scales.json', 'r') as f:
+        scales = json.load(f)
+    # print(scales)
+    return weights_bias, scales
 
 
 def main():
@@ -59,7 +62,10 @@ def main():
         assert len(argv) == 2, "Need one argument, the dataset the program will make the predictions on"
         file_name = argv[1]
         dataset = pd.read_csv(file_name)
-        weights_bias = open_json()
+        weights_bias, scales = open_json()
+        dataset.columns = columns
+        dataset = dataset.drop("id", axis=1)
+        normalize_dataset(dataset, scales)
         forward_propagation(weights_bias, dataset)
     except AssertionError as e:
         print("Error:", e)
