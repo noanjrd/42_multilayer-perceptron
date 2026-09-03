@@ -173,6 +173,7 @@ def initalization(args: argparse.Namespace):
 
     return x_train, x_valid, training_data, mins_and_maxs
 
+
 def start_training(args: argparse.Namespace) -> None:
     """Train a network from CLI configuration, save it, and display metrics."""
     x_train, x_valid, training_data, mins_and_maxs = initalization(args)

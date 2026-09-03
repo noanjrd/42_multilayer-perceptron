@@ -3,7 +3,8 @@ from Layer import Layer
 import numpy as np
 import pandas as pd
 
-def normalize_dataset(dataset: pd.DataFrame, mins_and_maxs: list[tuple[int,int]] = None) -> None:
+
+def normalize_dataset(dataset: pd.DataFrame, mins_and_maxs: list[tuple[int, int]] = None) -> None:
     """Min-max normalize feature columns in place, preserving diagnosis labels."""
     new_mins_maxs = []
     i = 0
@@ -18,9 +19,8 @@ def normalize_dataset(dataset: pd.DataFrame, mins_and_maxs: list[tuple[int,int]]
             min = mins_and_maxs[i][0]
             max = mins_and_maxs[i][1]
         dataset[col] = (dataset[col] - min) / (max - min)
-        i+=1
-        
-    # print(new_mins_maxs)
+        i += 1
+
     return new_mins_maxs
 
 

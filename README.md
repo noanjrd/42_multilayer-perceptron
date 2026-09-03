@@ -57,10 +57,12 @@ python3 process_dataset.py
 This command:
 
 1. reads `data.csv`;
-2. removes the sample ID;
-4. applies min-max normalization to dataset
-3. randomly splits the rows into 80% training and 20% validation sets;
-5. creates `training_dataset.csv` and `validation_dataset.csv`.
+2. randomly splits the rows into 80% training and 20% validation sets;
+3. creates `training_dataset.csv` and `validation_dataset.csv`.
+
+The generated files retain the sample ID, diagnosis, and raw feature values.
+Normalization is performed by `training.py`, so it can be fitted only on the
+training split.
 
 The split is random and currently has no fixed seed, so rerunning this command
 will produce different datasets.
@@ -104,6 +106,10 @@ Training writes the best model to `weights_bias.json`. When training finishes,
 it prints the macro validation F1 score and opens plots for loss, accuracy,
 precision/recall, and F1.
 
+The 30 features are min-max normalized using the training split's minimum and
+maximum values. Those scales are saved to `scales.json` and reused for
+validation and prediction; keep it with its matching `weights_bias.json`.
+
 ### Training statistics
 
 The model achieved a macro validation F1 score of **0.99** in the example run
@@ -121,11 +127,11 @@ accuracy, per-class precision and recall, and per-class validation F1 score:
 python3 prediction.py validation_dataset.csv
 ```
 
-Prediction loads `weights_bias.json` from the current directory, runs a forward
-pass on a labeled dataset, and prints its mean cross-entropy loss. The input
-must include the `diagnosis` column and the same 30 normalized feature columns,
-in the same order used for training. It does not currently write predicted
-labels to a file.
+Prediction loads `weights_bias.json` and its matching `scales.json` from the
+current directory, normalizes the raw features, runs a forward pass on a
+labeled dataset, and prints its mean cross-entropy loss. The input must include
+the sample ID, `diagnosis`, and the same 30 raw feature columns in the order
+used for training. It does not currently write predicted labels to a file.
 
 ## Dataset format
 
@@ -145,15 +151,16 @@ concavity, concave points, symmetry, and fractal dimension.
 
 | File | Created by | Purpose |
 | --- | --- | --- |
-| `training_dataset.csv` | `process_dataset.py` | Normalized training split |
-| `validation_dataset.csv` | `process_dataset.py` | Normalized validation split |
+| `training_dataset.csv` | `process_dataset.py` | Raw training split |
+| `validation_dataset.csv` | `process_dataset.py` | Raw validation split |
 | `weights_bias.json` | `training.py` | Weights and biases from the best validation epoch |
+| `scales.json` | `training.py` | Training-split min/max values used to normalize each feature |
 
 ## Project structure
 
 | File | Responsibility |
 | --- | --- |
-| `process_dataset.py` | Loads, splits, and normalizes the raw dataset |
+| `process_dataset.py` | Loads and splits the raw dataset |
 | `training.py` | Forward pass, backpropagation, Adam updates, and training loop |
 | `prediction.py` | Loads a saved model and reports loss for a labeled dataset |
 | `Layer.py` | Stores layer parameters, activations, gradients, and Adam state |
